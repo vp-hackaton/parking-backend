@@ -1,0 +1,75 @@
+{
+    "users": [
+        {
+            "email": "ccruz@velocitypartners.net",
+            "name": "Catherine Cruz",
+            "vehicles": [
+                {
+                    "plate": "CCC001",
+                    "model": 2010,
+                    "color": "Beige",
+                    "type": "CAR",
+                    "is_main": true
+                },
+                {
+                    "plate": "AAA03C",
+                    "model": 2010,
+                    "color": "Red",
+                    "type": "MOTORCYCLE",
+                    "is_main": false
+                }
+            ],
+            "wfh": "Wednesday",
+            "is_active": true,
+            "password": "wrong",
+            "free_days": [
+                "25-12-2017"
+            ]
+        },
+        {
+            "email": "acano@velocitypartners.net",
+            "name": "Alexander Cano",
+            "vehicles": [
+                {
+                    "plate": "DMK168",
+                    "model": 2012,
+                    "color": "Black",
+                    "type": "CAR",
+                    "is_main": true
+                }
+            ],
+            "wfh": "Wednesday",
+            "is_active": true,
+            "password": "secret",
+            "free_days": [
+                "25-12-2017",
+                "01-01-2018"
+            ]
+        }
+    ],
+    "configuration": [
+        [
+            "car_slots:20",
+            "bikes_slots:24"
+        ]
+    ],
+    "holidays": [
+        "09-01-2017",
+        "20-03-2017",
+        "13-04-2017",
+        "14-04-2017",
+        "01-05-2017",
+        "29-05-2017",
+        "19-06-2017",
+        "26-06-2017",
+        "03-07-2017",
+        "20-07-2017",
+        "07-08-2017",
+        "21-08-2017",
+        "16-10-2017",
+        "06-11-2017",
+        "13-11-2017",
+        "08-12-2017",
+        "25-12-2017"
+    ]
+}
