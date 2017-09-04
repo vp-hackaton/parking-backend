@@ -1,30 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"strconv"
 	"strings"
 	"time"
 )
-
-func getFixedTime(dateToFormat string) time.Time {
-	splited := strings.Split(dateToFormat, "-")
-	loc, _ := time.LoadLocation("UTC")
-	year, err := strconv.Atoi(splited[2])
-	if err != nil {
-		log.Fatal("Cannot convert year", err)
-	}
-	month, err := strconv.Atoi(splited[1])
-	if err != nil {
-		log.Fatal("Cannot convert month", err)
-	}
-	day, err := strconv.Atoi(splited[0])
-	if err != nil {
-		log.Fatal("Cannot convert day", err)
-	}
-	return time.Date(year, time.Month(month), day, 0, 0, 0, 0, loc)
-}
 
 func main() {
 
@@ -48,10 +29,6 @@ func main() {
 		allUsers[user.Email] = append(days, user.Freedays...)
 	}
 
-	for k, v := range allUsers {
-		fmt.Println("Usero: ", k, v)
-	}
-
 	var confs []configs
 	err = firebaseEndpointHandler("configuration", &confs)
 	if err != nil {
@@ -59,6 +36,21 @@ func main() {
 		return
 	}
 
+	configurations := make(map[string]int)
+	for _, conf := range confs {
+		key, value := parseConfig(conf)
+		configurations[key] = value
+	}
+
 	// Process the data
 	// Send data to the REST endpoint
+}
+
+func parseConfig(config configs) (string, int) {
+	configArr := strings.Split(config, ":")
+	i, err := strconv.Atoi(configArr[1])
+	if err != nil {
+		log.Fatal("Error: ", err)
+	}
+	return configArr[0], i
 }
