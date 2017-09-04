@@ -14,7 +14,7 @@ type user struct {
 	Email    string    `json:"email"`
 	Name     string    `json:"name"`
 	Vehicle  []vehicle `json:"vehicles"`
-	Whf      string    `json:"wfh"`
+	Wfh      string    `json:"wfh"`
 	IsActive bool      `json:"is_active"`
 	Password string    `json:"password"`
 	Freedays []string  `json:"free_days"`

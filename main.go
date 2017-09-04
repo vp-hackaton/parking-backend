@@ -13,15 +13,15 @@ func getFixedTime(dateToFormat string) time.Time {
 	loc, _ := time.LoadLocation("UTC")
 	year, err := strconv.Atoi(splited[2])
 	if err != nil {
-		log.Fatal("Cannot convert year")
+		log.Fatal("Cannot convert year", err)
 	}
 	month, err := strconv.Atoi(splited[1])
 	if err != nil {
-		log.Fatal("Cannot convert month")
+		log.Fatal("Cannot convert month", err)
 	}
 	day, err := strconv.Atoi(splited[0])
 	if err != nil {
-		log.Fatal("Cannot convert day")
+		log.Fatal("Cannot convert day", err)
 	}
 	return time.Date(year, time.Month(month), day, 0, 0, 0, 0, loc)
 }
@@ -37,13 +37,20 @@ func main() {
 		return
 	}
 
-	days, err := WFHToDays("Wednesday", "2017-09-01")
-	if err != nil {
-		log.Fatal("Error: ", err)
-		return
+	allUsers := make(map[string][]string)
+	for _, user := range users {
+		days, err := FreeDaysToSlice(user.Wfh, time.Now().Format("2006-01-02"))
+		if err != nil {
+			log.Fatal("Error: ", err)
+			return
+		}
+		allUsers[user.Email] = days
+		allUsers[user.Email] = append(days, user.Freedays...)
 	}
 
-	fmt.Println("Day: ", days)
+	for k, v := range allUsers {
+		fmt.Println("Usero: ", k, v)
+	}
 
 	var confs []configs
 	err = firebaseEndpointHandler("configuration", &confs)
