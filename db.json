@@ -48,10 +48,8 @@
         }
     ],
     "configuration": [
-        [
-            "car_slots:20",
-            "bikes_slots:24"
-        ]
+        "car_slots:20",
+        "bikes_slots:24"
     ],
     "holidays": [
         "09-01-2017",

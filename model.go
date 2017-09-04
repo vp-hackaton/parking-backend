@@ -8,9 +8,7 @@ type vehicle struct {
 	IsMain bool   `json:"is_main"`
 }
 
-type configs struct {
-	Value string `json:"value"`
-}
+type configs string
 
 type user struct {
 	Email    string    `json:"email"`

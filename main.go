@@ -2,15 +2,12 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 )
-
-var endpointURL string
 
 func getFixedTime(dateToFormat string) time.Time {
 	splited := strings.Split(dateToFormat, "-")
@@ -33,17 +30,21 @@ func getFixedTime(dateToFormat string) time.Time {
 func main() {
 
 	// Read data from the Firebase REST endpoints
+
+	var users []user
 	userEndpointURL := "https://vpparking-de51c.firebaseio.com/users.json"
+	err := endpointHandler(userEndpointURL, &users)
+	if err != nil {
+		log.Fatal("Cannot get users info", err)
+		return
+	}
 
-	var records []user
-
-	endpointHandler(userEndpointURL, &records)
-
-	for _, record := range records {
-		fmt.Println(record)
-		for _, freeday := range record.Freedays {
-			fmt.Println(getFixedTime(freeday))
-		}
+	var confs []configs
+	configEndpointURL := "https://vpparking-de51c.firebaseio.com/configuration.json"
+	err = endpointHandler(configEndpointURL, &confs)
+	if err != nil {
+		log.Fatal("Cannot get configuration info", err)
+		return
 	}
 
 	// Process the data
