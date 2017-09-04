@@ -19,3 +19,8 @@ type user struct {
 	Password string    `json:"password"`
 	Freedays []string  `json:"free_days"`
 }
+
+type assignment struct {
+	Email string
+	Days  []string
+}
