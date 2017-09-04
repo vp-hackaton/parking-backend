@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -35,6 +36,14 @@ func main() {
 		log.Fatal("Cannot get users info", err)
 		return
 	}
+
+	days, err := WFHToDays("Wednesday", "2017-09-01")
+	if err != nil {
+		log.Fatal("Error: ", err)
+		return
+	}
+
+	fmt.Println("Day: ", days)
 
 	var confs []configs
 	err = firebaseEndpointHandler("configuration", &confs)
