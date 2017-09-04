@@ -10,28 +10,6 @@ import (
 	"time"
 )
 
-type vehicle struct {
-	Plate  string `json:"plate"`
-	Model  int    `json:"model"`
-	Color  string `json:"color"`
-	Type   string `json:"type"`
-	IsMain bool   `json:"is_main"`
-}
-
-type configs struct {
-	Value string `json:"value"`
-}
-
-type user struct {
-	Email    string    `json:"email"`
-	Name     string    `json:"name"`
-	Vehicle  []vehicle `json:"vehicles"`
-	Whf      string    `json:"wfh"`
-	IsActive bool      `json:"is_active"`
-	Password string    `json:"password"`
-	Freedays []string  `json:"free_days"`
-}
-
 var endpointURL string
 
 func getFixedTime(dateToFormat string) time.Time {
@@ -55,13 +33,29 @@ func getFixedTime(dateToFormat string) time.Time {
 func main() {
 
 	// Read data from the Firebase REST endpoints
-	endpointURL = "http://localhost:3000/users"
+	userEndpointURL := "https://vpparking-de51c.firebaseio.com/users.json"
 
+	var records []user
+
+	endpointHandler(userEndpointURL, &records)
+
+	for _, record := range records {
+		fmt.Println(record)
+		for _, freeday := range record.Freedays {
+			fmt.Println(getFixedTime(freeday))
+		}
+	}
+
+	// Process the data
+	// Send data to the REST endpoint
+}
+
+func endpointHandler(endpointURL string, records interface{}) error {
 	// Build the request
 	req, err := http.NewRequest("GET", endpointURL, nil)
 	if err != nil {
 		log.Fatal("NewRequest: ", err)
-		return
+		return err
 	}
 
 	// For control over HTTP client headers,
@@ -76,7 +70,7 @@ func main() {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Fatal("Do: ", err)
-		return
+		return err
 	}
 
 	// Callers should close resp.Body
@@ -85,20 +79,10 @@ func main() {
 	defer resp.Body.Close()
 
 	// Fill the record with the data from the JSON
-	var records []user
 
 	// Use json.Decode for reading streams of JSON data
 	if err := json.NewDecoder(resp.Body).Decode(&records); err != nil {
 		log.Println(err)
 	}
-
-	for _, record := range records {
-		fmt.Println(record)
-		for _, freeday := range record.Freedays {
-			fmt.Println(getFixedTime(freeday))
-		}
-	}
-
-	// Process the data
-	// Send data to the REST endpoint
+	return err
 }
