@@ -44,20 +44,45 @@ func main() {
 		configurations[key] = value
 	}
 
-	pointedUsers, err := createUserAssignation(&allUsers, configurations["car_slots"])
+	pointedUsers, err := createUserAssignation(allUsers, configurations["car_slots"], 0)
 	if err != nil {
 		log.Fatal("Error: ", err)
 		return
 	}
 
-	for _, usersa := range pointedUsers {
-		fmt.Println("Pointed users: ", usersa)
+	remainingUsers, err := createUserAssignation(allUsers, configurations["users_size"]-configurations["car_slots"], configurations["car_slots"])
+	if err != nil {
+		log.Fatal("Error: ", err)
+		return
 	}
 
 	// Process the data
 	assignedDays := assignedDaysMap(configurations["current_month"], configurations["car_slots"])
+
+	for key, value := range assignedDays {
+		currentSlotsAssigned := 0
+		for _, userInfo := range pointedUsers {
+			if !ContainsDate(key, userInfo.Days) {
+				value[currentSlotsAssigned] = userInfo.Email
+				currentSlotsAssigned++
+			}
+		}
+		if currentSlotsAssigned < configurations["car_slots"] {
+			for _, userInfo := range remainingUsers {
+				if !ContainsDate(key, userInfo.Days) {
+					value[currentSlotsAssigned] = userInfo.Email
+					currentSlotsAssigned++
+					if currentSlotsAssigned == configurations["car_slots"] {
+						break
+					}
+				}
+			}
+		}
+	}
+
 	fmt.Println(assignedDays)
 	// Send data to the REST endpoint
+
 }
 
 func parseConfig(config configs) (string, int) {
@@ -69,12 +94,13 @@ func parseConfig(config configs) (string, int) {
 	return configArr[0], i
 }
 
-func createUserAssignation(allUsers *[]assignment, numberOfSlots int) ([]assignment, error) {
-	i := 0
+func createUserAssignation(allUsers []assignment, numberOfSlots int, currentPos int) ([]assignment, error) {
+	i := currentPos
 	var assigmentUsers []assignment
 	for i < numberOfSlots {
-		assigmentUsers = append(assigmentUsers, (*allUsers)[i])
-		*allUsers = append((*allUsers)[:i], (*allUsers)[i+1:]...)
+		actualValue := (allUsers)[i]
+		assigmentUsers = append(assigmentUsers, actualValue)
+		allUsers = append((allUsers)[:i], (allUsers)[i+1:]...)
 		i++
 	}
 	return assigmentUsers, nil

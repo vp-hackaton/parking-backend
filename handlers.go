@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/zabawaba99/firego"
 )
 
 func endpointHandler(endpointURL string, records interface{}) error {
@@ -48,4 +50,15 @@ func firebaseEndpointHandler(endpointName string, records interface{}) error {
 	firebaseRootURL := "https://vpparking-de51c.firebaseio.com/%s.json"
 	endpointURL := fmt.Sprintf(firebaseRootURL, endpointName)
 	return endpointHandler(endpointURL, records)
+}
+
+func sendDataToFirebase(json string) {
+	fb := firego.New("https://vpparking-de51c.firebaseio.com", nil)
+
+	v := map[string]interface{}{
+		"assigned2": json,
+	}
+	if err := fb.Set(v); err != nil {
+		log.Fatal(err)
+	}
 }
