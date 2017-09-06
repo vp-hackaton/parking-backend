@@ -1,10 +1,11 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -39,7 +40,7 @@ func main() {
 
 	configurations := make(map[string]int)
 	for _, conf := range confs {
-		key, value := parseConfig(conf)
+		key, value := conf.parse()
 		configurations[key] = value
 	}
 
@@ -78,19 +79,13 @@ func main() {
 			}
 		}
 	}
-
-	fmt.Println(assignedDays)
 	// Send data to the REST endpoint
-
-}
-
-func parseConfig(config configs) (string, int) {
-	configArr := strings.Split(config, ":")
-	i, err := strconv.Atoi(configArr[1])
+	jsonString, err := json.Marshal(assignedDays)
 	if err != nil {
-		log.Fatal("Error: ", err)
+		log.Fatal("Error: Cannot parse the json response", err)
+		return
 	}
-	return configArr[0], i
+	fmt.Println(string(jsonString))
 }
 
 func createUserAssignation(allUsers []assignment, numberOfSlots int, currentPos int) ([]assignment, error) {
