@@ -1,11 +1,9 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
-	"strconv"
 	"time"
 )
 
@@ -37,17 +35,20 @@ func main() {
 		return
 	}
 
-	pointedUsers, err := createUserAssignation(allUsers, configurations["car_slots"], 0)
+	pointedUsers, index, err := createUserAssignation(allUsers, configurations["car_slots"], 0)
 	if err != nil {
 		log.Fatal("Error: ", err)
 		return
 	}
 
-	remainingUsers, err := createUserAssignation(allUsers, configurations["users_size"]-configurations["car_slots"], configurations["car_slots"])
+	remainingUsers, index, err := createUserAssignation(allUsers, configurations["users_size"]-configurations["car_slots"], index)
 	if err != nil {
 		log.Fatal("Error: ", err)
 		return
 	}
+
+	// Update index in the configurations to know the current position for the next assignation
+	fmt.Println("Last index assigned, ", index)
 
 	// Process the data
 	assignedDays := InitAssignedDaysMap(configurations["current_month"], configurations["car_slots"])
@@ -81,14 +82,24 @@ func main() {
 	fmt.Println(string(jsonString))
 }
 
-func createUserAssignation(allUsers []assignment, numberOfSlots int, currentPos int) ([]assignment, error) {
-	i := currentPos
-	var assigmentUsers []assignment
-	for i < numberOfSlots {
-		actualValue := (allUsers)[i]
-		assigmentUsers = append(assigmentUsers, actualValue)
-		allUsers = append((allUsers)[:i], (allUsers)[i+1:]...)
-		i++
+func createUserAssignation(users []assignment, slots int, startAt int) ([]assignment, int, error) {
+	if len(users) == 0 {
+		return users, 0, nil
 	}
-	return assigmentUsers, nil
+	if slots > len(users) {
+		return users, 0, nil
+	}
+	i := startAt
+	count := 0
+	var result []assignment
+	for count < slots {
+		if i == slots {
+			i = 0
+		}
+		actualValue := (users)[i]
+		result = append(result, actualValue)
+		i++
+		count++
+	}
+	return result, i, nil
 }
