@@ -14,34 +14,27 @@ func main() {
 	// Read data from the Firebase REST endpoints
 
 	var users []user
-	err := firebaseEndpointHandler("users", &users)
-	if err != nil {
-		log.Fatal("Cannot get users info", err)
+
+	if err := getUsersFromFB(&users); err != nil {
+		log.Fatal(err)
 		return
 	}
 
-	allUsers := make([]assignment, len(users))
-	for i, user := range users {
+	var allUsers []assignment
+	for _, user := range users {
 		days, err := FreeDaysToSlice(user.Wfh, time.Now().Format("2006-01-02"))
 		if err != nil {
 			log.Fatal("Error: ", err)
 			return
 		}
 		assign := assignment{Email: user.Email, Days: append(days, user.Freedays...)}
-		allUsers[i] = assign
+		allUsers = append(allUsers, assign)
 	}
 
-	var confs []configs
-	err = firebaseEndpointHandler("configuration", &confs)
-	if err != nil {
-		log.Fatal("Cannot get configuration info", err)
+	var configurations configs
+	if err := getConfigsFromFB(&configurations); err != nil {
+		log.Fatal(err)
 		return
-	}
-
-	configurations := make(map[string]int)
-	for _, conf := range confs {
-		key, value := conf.parse()
-		configurations[key] = value
 	}
 
 	pointedUsers, err := createUserAssignation(allUsers, configurations["car_slots"], 0)

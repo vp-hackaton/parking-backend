@@ -1,11 +1,5 @@
 package main
 
-import (
-	"log"
-	"strconv"
-	"strings"
-)
-
 type vehicle struct {
 	Plate  string `json:"plate"`
 	Model  int    `json:"model"`
@@ -14,7 +8,7 @@ type vehicle struct {
 	IsMain bool   `json:"is_main"`
 }
 
-type configs string
+type configs map[string]int
 
 type user struct {
 	Email    string    `json:"email"`
@@ -29,13 +23,4 @@ type user struct {
 type assignment struct {
 	Email string
 	Days  []string
-}
-
-func (c configs) parse() (string, int) {
-	confSlice := strings.Split(string(c), ":")
-	i, err := strconv.Atoi(confSlice[1])
-	if err != nil {
-		log.Fatalf("Error: Cannot parse the config param %s %e", c, err)
-	}
-	return confSlice[0], i
 }
