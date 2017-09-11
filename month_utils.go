@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"log"
+	"strconv"
 	"time"
 )
 
@@ -35,4 +37,58 @@ func ContainsDate(dateToFind string, datesSlice []string) bool {
 		}
 	}
 	return false
+}
+
+// IsWorkDay validates if a given date is a work day
+func IsWorkDay(monthBase int, dayNumber int) bool {
+	loc, _ := time.LoadLocation("UTC")
+	nameDay := time.Date(time.Now().Local().Year(), time.Month(monthBase), dayNumber, 0, 0, 0, 0, loc).Weekday().String()
+	if nameDay == "Saturday" || nameDay == "Sunday" {
+		return false
+	}
+	return true
+
+}
+
+// LastDayOfMonth returns the last day number of a given month
+func LastDayOfMonth(monthBase int) int {
+	loc, _ := time.LoadLocation("UTC")
+	return time.Date(time.Now().Local().Year(), time.Month(monthBase), 1, 0, 0, 0, 0, loc).AddDate(0, 1, -1).Day()
+}
+
+// InitAssignedDaysMap set the initial dates map to be assigned for a given month, users arrays starts empty
+func InitAssignedDaysMap(monthToLoad int, slotSize int) map[string][]string {
+	lastDay := LastDayOfMonth(monthToLoad)
+	assignedDays := make(map[string][]string)
+	for i := 1; i <= lastDay; i++ {
+		if IsWorkDay(monthToLoad, i) {
+			assignedDays[DayFullString(monthToLoad, i)] = make([]string, slotSize)
+		}
+	}
+	return assignedDays
+}
+
+// DayFullString return the full formated date for a given day, it adds the 0 digit before < 10 day numbers. Example: 2017-11-09
+func DayFullString(monthToLoad int, dayNumber int) string {
+	if dayNumber < 10 {
+		return ConcatStringArray([]string{YearMonthString(monthToLoad), "-0", strconv.Itoa(dayNumber)})
+	}
+	return ConcatStringArray([]string{YearMonthString(monthToLoad), "-", strconv.Itoa(dayNumber)})
+}
+
+// YearMonthString return a year-month concat, it adds the 0 digit before < 10 months numbers. Example: 2017-01
+func YearMonthString(monthToLoad int) string {
+	if monthToLoad < 10 {
+		return ConcatStringArray([]string{strconv.Itoa(time.Now().Local().Year()), "-0", strconv.Itoa(monthToLoad)})
+	}
+	return ConcatStringArray([]string{strconv.Itoa(time.Now().Local().Year()), "-", strconv.Itoa(monthToLoad)})
+}
+
+// ConcatStringArray concat all string elements in a given array to a single string return
+func ConcatStringArray(stringSlice []string) string {
+	var buffer bytes.Buffer
+	for _, stringItem := range stringSlice {
+		buffer.WriteString(stringItem)
+	}
+	return buffer.String()
 }

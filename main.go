@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"log"
 	"strconv"
@@ -57,7 +56,7 @@ func main() {
 	}
 
 	// Process the data
-	assignedDays := assignedDaysMap(configurations["current_month"], configurations["car_slots"])
+	assignedDays := InitAssignedDaysMap(configurations["current_month"], configurations["car_slots"])
 
 	for key, value := range assignedDays {
 		currentSlotsAssigned := 0
@@ -104,54 +103,4 @@ func createUserAssignation(allUsers []assignment, numberOfSlots int, currentPos 
 		i++
 	}
 	return assigmentUsers, nil
-}
-
-func assignedDaysMap(monthToLoad int, slotSize int) map[string][]string {
-	lastDay := lastDayOfMonth(monthToLoad)
-	assignedDays := make(map[string][]string)
-	for i := 1; i <= lastDay; i++ {
-		if isWorkDay(monthToLoad, i) {
-			assignedDays[dayFullString(monthToLoad, i)] = make([]string, slotSize)
-		}
-	}
-	return assignedDays
-}
-
-func dayFullString(monthToLoad int, dayNumber int) string {
-	if dayNumber < 10 {
-		return concatString([]string{yearMonthString(monthToLoad), "0", strconv.Itoa(dayNumber)})
-	}
-	return concatString([]string{yearMonthString(monthToLoad), strconv.Itoa(dayNumber)})
-
-}
-
-func yearMonthString(monthToLoad int) string {
-	if monthToLoad < 10 {
-		return concatString([]string{strconv.Itoa(time.Now().Local().Year()), "-0", strconv.Itoa(monthToLoad), "-"})
-	}
-	return concatString([]string{strconv.Itoa(time.Now().Local().Year()), "-", strconv.Itoa(monthToLoad), "-"})
-
-}
-
-func concatString(stringSlice []string) string {
-	var buffer bytes.Buffer
-	for _, stringItem := range stringSlice {
-		buffer.WriteString(stringItem)
-	}
-	return buffer.String()
-}
-
-func lastDayOfMonth(monthBase int) int {
-	loc, _ := time.LoadLocation("UTC")
-	return time.Date(time.Now().Local().Year(), time.Month(monthBase), 1, 0, 0, 0, 0, loc).AddDate(0, 1, -1).Day()
-}
-
-func isWorkDay(monthBase int, dayNumber int) bool {
-	loc, _ := time.LoadLocation("UTC")
-	nameDay := time.Date(time.Now().Local().Year(), time.Month(monthBase), dayNumber, 0, 0, 0, 0, loc).Weekday().String()
-	if nameDay == "Saturday" || nameDay == "Sunday" {
-		return false
-	}
-	return true
-
 }
