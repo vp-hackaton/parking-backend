@@ -4,13 +4,29 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"time"
 )
 
 func main() {
 
-	// Read data from the Firebase REST endpoints
+	http.HandleFunc("/", handleIndex)
+	http.HandleFunc("/montly_assigment", handleMonthlyAssignment)
+	err := http.ListenAndServe(":3001", nil)
+	if err != nil {
+		log.Fatal("ListenAndServe: ", err)
+	}
+}
 
+func handleIndex(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "VP-Parking its ALIVE!!! muajajajaja :}")
+}
+
+func handleMonthlyAssignment(w http.ResponseWriter, r *http.Request) {
+
+	r.ParseForm() //Parse url parameters and body
+
+	// Read data from the Firebase REST endpoints
 	var users []user
 
 	if err := getUsersFromFB(&users); err != nil {
@@ -35,6 +51,13 @@ func main() {
 		return
 	}
 
+	// update the current month and year
+	if configurations["current_month"] == 12 {
+		configurations["current_month"] = 1
+	} else {
+		configurations["current_month"] = configurations["current_month"] + 1
+	}
+
 	pointedUsers, index, err := createUserAssignation(allUsers, configurations["car_slots"], 0)
 	if err != nil {
 		log.Fatal("Error: ", err)
@@ -47,12 +70,25 @@ func main() {
 		return
 	}
 
-	// Update index in the configurations to know the current position for the next assignation
-	fmt.Println("Last index assigned, ", index)
-
-	// Process the data
+	// Init the assignedDays map by month and valid dates
 	assignedDays := InitAssignedDaysMap(configurations["current_month"], configurations["car_slots"])
 
+	// Fill the parking slots with the pointed users array and if necessary the remainingUsers
+	assignedDays = assignMonthlyParking(assignedDays, pointedUsers, remainingUsers, configurations["car_slots"])
+
+	// update the index for the next month users list
+	configurations["monthly_pointer"] = configurations["monthly_pointer"] + configurations["car_slots"]
+
+	// Send data to the REST endpoint
+	jsonString, err := json.Marshal(assignedDays)
+	if err != nil {
+		log.Fatal("Error: Cannot parse the json response", err)
+		return
+	}
+	fmt.Fprintln(w, string(jsonString))
+}
+
+func assignMonthlyParking(assignedDays map[string][]string, pointedUsers []assignment, remainingUsers []assignment, slotsSize int) map[string][]string {
 	for key, value := range assignedDays {
 		currentSlotsAssigned := 0
 		for _, userInfo := range pointedUsers {
@@ -61,25 +97,19 @@ func main() {
 				currentSlotsAssigned++
 			}
 		}
-		if currentSlotsAssigned < configurations["car_slots"] {
+		if currentSlotsAssigned < slotsSize {
 			for _, userInfo := range remainingUsers {
 				if !ContainsDate(key, userInfo.Days) {
 					value[currentSlotsAssigned] = userInfo.Email
 					currentSlotsAssigned++
-					if currentSlotsAssigned == configurations["car_slots"] {
+					if currentSlotsAssigned == slotsSize {
 						break
 					}
 				}
 			}
 		}
 	}
-	// Send data to the REST endpoint
-	jsonString, err := json.Marshal(assignedDays)
-	if err != nil {
-		log.Fatal("Error: Cannot parse the json response", err)
-		return
-	}
-	fmt.Println(string(jsonString))
+	return assignedDays
 }
 
 func createUserAssignation(users []assignment, slots int, startAt int) ([]assignment, int, error) {

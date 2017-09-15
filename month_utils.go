@@ -1,9 +1,9 @@
 package main
 
 import (
-	"bytes"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -71,24 +71,15 @@ func InitAssignedDaysMap(monthToLoad int, slotSize int) map[string][]string {
 // DayFullString return the full formated date for a given day, it adds the 0 digit before < 10 day numbers. Example: 2017-11-09
 func DayFullString(monthToLoad int, dayNumber int) string {
 	if dayNumber < 10 {
-		return ConcatStringArray([]string{YearMonthString(monthToLoad), "-0", strconv.Itoa(dayNumber)})
+		return strings.Join([]string{YearMonthString(monthToLoad), "-0", strconv.Itoa(dayNumber)}, "")
 	}
-	return ConcatStringArray([]string{YearMonthString(monthToLoad), "-", strconv.Itoa(dayNumber)})
+	return strings.Join([]string{YearMonthString(monthToLoad), "-", strconv.Itoa(dayNumber)}, "")
 }
 
 // YearMonthString return a year-month concat, it adds the 0 digit before < 10 months numbers. Example: 2017-01
 func YearMonthString(monthToLoad int) string {
 	if monthToLoad < 10 {
-		return ConcatStringArray([]string{strconv.Itoa(time.Now().Local().Year()), "-0", strconv.Itoa(monthToLoad)})
+		return strings.Join([]string{strconv.Itoa(time.Now().Local().Year()), "-0", strconv.Itoa(monthToLoad)}, "")
 	}
-	return ConcatStringArray([]string{strconv.Itoa(time.Now().Local().Year()), "-", strconv.Itoa(monthToLoad)})
-}
-
-// ConcatStringArray concat all string elements in a given array to a single string return
-func ConcatStringArray(stringSlice []string) string {
-	var buffer bytes.Buffer
-	for _, stringItem := range stringSlice {
-		buffer.WriteString(stringItem)
-	}
-	return buffer.String()
+	return strings.Join([]string{strconv.Itoa(time.Now().Local().Year()), "-", strconv.Itoa(monthToLoad)}, "")
 }
